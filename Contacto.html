@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Isla Hotel Campestre</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <!-- ENCABEZADO FIJO -->
+    <header>
+        <nav id="navbar" class="bg-black fixed top-0 left-0 w-full p-4 text-white z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <img src="isla/2.png" alt="Logo del Hotel" class="w-16 h-16" loading="lazy">
+                    <h1 class="text-xl font-bold">LA ISLA HOTEL CAMPESTRE</h1>
+                </div>
+                <button id="menu-toggle" class="md:hidden text-xl" aria-label="Abrir menú">&#9776;</button>
+                <ul id="menu" class="hidden md:flex space-x-6 ml-auto">
+                    <li><a href="index.html" class="hover:text-yellow-400">Inicio</a></li>
+                    <li><a href="Catálogo.html" class="hover:text-yellow-400">Catálogo</a></li>
+                    <li><a href="Servicios.html" class="hover:text-yellow-400">Servicios</a></li>
+                    <li><a href="Contacto.html" class="hover:text-yellow-400">Contacto</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- SWIPER - Carrusel -->
+    <section class="swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <img src="isla/entr.png" alt="Entrada del hotel" loading="lazy">
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </section>
+
+    <!-- SECCIÓN UBICACIÓN -->
+    <section class="max-w-6xl mx-auto my-6 p-4 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-bold text-center mb-4">Nuestra Ubicación</h2>
+        <div class="relative w-full h-64 md:h-96">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d5473.106205782083!2d-75.22614795029017!3d3.2320090676306354!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2sco!4v1743123945453!5m2!1ses!2sco" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-blue-900 text-white p-6">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between">
+            <div class="w-full md:w-1/3 mb-4">
+                <h3 class="text-lg font-bold">La Isla Hotel Campestre</h3>
+
+     <!-- Redes Sociales alineadas correctamente -->
+<div class="flex items-center space-x-4 mt-4">
+    <a href="https://www.facebook.com/share/1KQtGRxm6i/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" 
+             alt="Facebook" width="40" height="40">
+    </a>
+    <a href="https://www.instagram.com/laislahotelcampestre_2/profilecard/?igsh=MWV2ZDlmNzI3ZnV2Yg==" target="_blank" rel="noopener noreferrer">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" 
+             alt="Instagram" width="40" height="40">
+    </a>
+    <a href="https://wa.me/573134621068" target="_blank" rel="noopener noreferrer">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
+             alt="WhatsApp" width="40" height="40">
+    </a>
+    <a href="https://www.airbnb.mx/rooms/1031115435557533593?guests=1&adults=1&s=67&unique_share_id=38c86350-4401-4dab-846a-879f18b0a244" target="_blank" rel="noopener noreferrer">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_Bélo.svg" 
+             alt="Airbnb" width="40" height="40">
+    </a>
+</div>
+
+            </div>
+            <div class="w-full md:w-1/3 mb-4">
+                <ul class="text-sm space-y-2">
+                    <li>¿Quiénes somos? </li>
+                    <li>Hospadte con Nosotros</li>
+                    <li>Servicio de Guianza al Desierto de la Tatacoa</li>
+                    <li>El mejor Hotel Campestre del Norte del Departamento </li>
+                    <li>Términos y políticas de uso</li>
+                </ul>
+            </div>
+            <div class="w-full md:w-1/3 mb-4">
+                <h3 class="text-lg font-bold">Encuéntranos</h3>
+                <div class="relative w-full h-40 md:h-60">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d5473.106205782083!2d-75.22614795029017!3d3.2320090676306354!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2sco!4v1743123945453!5m2!1ses!2sco" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-xs mt-4">© 2025 Todos los derechos reservados</div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            new Swiper(".swiper", {
+                loop: true,
+                pagination: { el: ".swiper-pagination", clickable: true },
+                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                effect: "fade",
+            });
+
+            const menuToggle = document.getElementById("menu-toggle");
+            const menu = document.getElementById("menu");
+
+            menuToggle.addEventListener("click", () => {
+                menu.classList.toggle("hidden");
+            });
+        });
+    </script>
+</body>
+</html>
