@@ -10,7 +10,7 @@
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
             import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    
+
             const firebaseConfig = {
                 apiKey: "TU_API_KEY",
                 authDomain: "TU_AUTH_DOMAIN",
@@ -19,41 +19,41 @@
                 messagingSenderId: "TU_MESSAGING_SENDER_ID",
                 appId: "TU_APP_ID"
             };
-    
+
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
             console.log("✅ Firestore conectado correctamente");
-    
+
             async function verificarDisponibilidad(tipo, entrada, salida) {
                 const reservasRef = collection(db, "reservas");
                 const q = query(reservasRef,
-    where("habitacion", "==", tipo),  // 👈 este es el cambio
-    where("entrada", "<", salida),
-    where("salida", ">", entrada)
-);
+                    where("habitacion", "==", tipo),
+                    where("entrada", "<", salida),
+                    where("salida", ">", entrada)
+                );
 
                 const snapshot = await getDocs(q);
                 return snapshot.empty;  
             }
-    
+
             document.addEventListener("DOMContentLoaded", () => {
                 const reservaForm = document.getElementById("reservaForm");
                 const spinner = document.getElementById("spinner");
                 const reservarBtn = reservaForm.querySelector("button");
-    
+
                 document.getElementById('menu-toggle').addEventListener('click', () => {
                     document.getElementById('menu').classList.toggle('hidden');
-           
                 });
 
                 document.querySelectorAll("#menu a").forEach(link => {
-    link.addEventListener("click", () => {
-        document.getElementById("menu").classList.add("hidden");
-    });
-});
+                    link.addEventListener("click", () => {
+                        document.getElementById("menu").classList.add("hidden");
+                    });
+                });
+
                 reservaForm.addEventListener("submit", async (e) => {
                     e.preventDefault();
-    
+
                     const nombre = document.getElementById("nombre").value.trim();
                     const email = document.getElementById("email").value.trim();
                     const entrada = new Date(document.getElementById("entrada").value);
@@ -61,7 +61,7 @@
                     const tipo = document.getElementById("tipo").value;
                     const hoy = new Date();
                     hoy.setHours(0, 0, 0, 0);
-    
+
                     if (!nombre || !email || isNaN(entrada) || isNaN(salida)) {
                         alert("⚠️ Por favor, completa todos los campos.");
                         return;
@@ -74,13 +74,13 @@
                         alert("⚠️ La fecha de salida debe ser después de la fecha de entrada.");
                         return;
                     }
-    
+
                     reservarBtn.disabled = true;
                     reservarBtn.textContent = "Verificando...";
                     spinner.classList.remove("hidden");
-    
+
                     const disponible = await verificarDisponibilidad(tipo, entrada.toISOString().split("T")[0], salida.toISOString().split("T")[0]);
-                    
+
                     if (!disponible) {
                         alert("❌ Lo sentimos, esas fechas ya están reservadas. Por favor, elige otras.");
                         reservarBtn.disabled = false;
@@ -88,35 +88,77 @@
                         spinner.classList.add("hidden");
                         return;
                     }
-                    
+
                     try {
                         await addDoc(collection(db, "reservas"), { 
-    nombre, 
-    email, 
-    entrada: entrada.toISOString().split("T")[0], 
-    salida: salida.toISOString().split("T")[0], 
-    habitacion: tipo  // 👈 este es el cambio
-});
+                            nombre, 
+                            email, 
+                            entrada: entrada.toISOString().split("T")[0], 
+                            salida: salida.toISOString().split("T")[0], 
+                            habitacion: tipo
+                        });
 
+                        alert("✅ Reserva realizada con éxito");
+                        reservaForm.reset();
+                    } catch (error) {
+                        console.error("❌ Error al guardar la reserva:", error);
+                        alert("❌ No se pudo completar la reserva. Inténtalo más tarde.");
+                    } finally {
+                        reservarBtn.disabled = false;
+                        reservarBtn.textContent = "Reservar";
+                        spinner.classList.add("hidden");
+                    }
+                });
 
-    alert("✅ Reserva realizada con éxito");
+                // CONSULTA DE RESERVAS
+                const consultaForm = document.getElementById("consultaForm");
+                const resultadoDiv = document.getElementById("resultadoReservas");
 
-    reservaForm.reset(); // Solo limpiar si la reserva se realizó con éxito
+                consultaForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById("consultaEmail").value.trim();
 
-} catch (error) {
-    console.error("❌ Error al guardar la reserva:", error);
-    alert("❌ No se pudo completar la reserva. Inténtalo más tarde.");
-} finally {
-    reservarBtn.disabled = false;
-    reservarBtn.textContent = "Reservar";
-    spinner.classList.add("hidden");
-}
+                    if (!email) {
+                        alert("⚠️ Ingresa un correo electrónico.");
+                        return;
+                    }
 
+                    resultadoDiv.innerHTML = `<p class="text-gray-500">🔍 Consultando reservas...</p>`;
+
+                    try {
+                        const reservasRef = collection(db, "reservas");
+                        const q = query(reservasRef, where("email", "==", email));
+                        const snapshot = await getDocs(q);
+
+                        if (snapshot.empty) {
+                            resultadoDiv.innerHTML = `<p class="text-red-500">❌ No se encontraron reservas con ese correo.</p>`;
+                            return;
+                        }
+
+                        let html = "";
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            html += `
+                                <div class="p-4 border rounded shadow bg-gray-50">
+                                    <p><strong>Nombre:</strong> ${data.nombre}</p>
+                                    <p><strong>Tipo:</strong> ${data.habitacion}</p>
+                                    <p><strong>Entrada:</strong> ${data.entrada}</p>
+                                    <p><strong>Salida:</strong> ${data.salida}</p>
+                                </div>
+                            `;
+                        });
+
+                        resultadoDiv.innerHTML = html;
+                    } catch (error) {
+                        console.error("❌ Error consultando reservas:", error);
+                        resultadoDiv.innerHTML = `<p class="text-red-500">❌ Ocurrió un error al consultar. Intenta más tarde.</p>`;
+                    }
                 });
             });
         </script>
     </head>
 <body class="bg-gray-100 text-gray-900">
+</body>
     <header>
         <nav id="navbar" class="bg-black fixed top-0 left-0 w-full p-4 text-white z-50">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
@@ -237,7 +279,7 @@
     <div id="resultadoReservas" class="mt-6 space-y-4"></div>
 </section>
 
-       <footer class="bg-black text-white py-8 mt-16 text-center">
-        <p>&copy; 2025 La Isla Hotel Campestre - Todos los derechos reservados</p>
-    </footer>
+<footer class="bg-black text-white py-8 mt-16 text-center">
+    <p>&copy; 2025 La Isla Hotel Campestre - Todos los derechos reservados</p>
+</footer>
 </html>
