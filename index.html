@@ -84,9 +84,6 @@
 
 </body>
 
-
-  
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const entradaInput = document.getElementById("entrada");
@@ -147,14 +144,14 @@
     } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
   
     const firebaseConfig = {
-      apiKey: "AIzaSyBRD9A3Tt1Brg0NJhNQUxVJoKY0bdpjFvE",
-      authDomain: "hotel-laisla.firebaseapp.com",
-      projectId: "hotel-laisla",
-      storageBucket: "hotel-laisla.appspot.com",
-      messagingSenderId: "1097874852033",
-      appId: "1:1097874852033:web:2b57908d04ae3e1a79ee69",
-      measurementId: "G-61HH9N7S6X"
-    };
+  apiKey: "AIzaSyALUzv8j9YKv__aXkcuJ2JD_DQQ7ZDw66M",
+  authDomain: "hotel-campestre-la-isla.firebaseapp.com",
+  projectId: "hotel-campestre-la-isla",
+  storageBucket: "hotel-campestre-la-isla.firebasestorage.app",
+  messagingSenderId: "939808374982",
+  appId: "1:939808374982:web:b77b2f3ebaa1992b8bd7c7",
+  measurementId: "G-DK1D6SVMBL"
+};
   
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -178,49 +175,49 @@
       const submitBtn = reservaForm.querySelector("button");
   
       reservaForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-  
-        const entrada = document.getElementById("entrada").value;
-        const salida = document.getElementById("salida").value;
-        const tipo = document.getElementById("tipo").value;
-  
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Verificando...";
-  
-        const disponible = await verificarDisponibilidad(tipo, entrada, salida);
-        console.log("¿Disponible?", disponible);
-  
-        if (!disponible) {
-          alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Reservar";
-          return;
-        }
-  
-        const nombre = document.getElementById("nombre").value;
-        const email = document.getElementById("email").value;
-  
-        const reserva = {
-          nombre,
-          email,
-          habitacion: tipo,
-          entrada,
-          salida
-        };
-  
-        try {
-          console.log("✅ Intentando guardar reserva");
-          await addDoc(collection(db, "reservas"), reserva);
-          alert("Reserva realizada con éxito.");
-          reservaForm.reset();
-        } catch (error) {
-          console.error("Error al guardar la reserva:", error);
-          alert("Ocurrió un error al guardar la reserva.");
-        }
-  
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Reservar";
-      });
+  e.preventDefault();
+
+  const entrada = document.getElementById("entrada").value;
+  const salida = document.getElementById("salida").value;
+  const tipo = document.getElementById("tipo").value;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Verificando...";
+
+  const disponible = await verificarDisponibilidad(tipo, entrada, salida);
+  console.log("¿Disponible?", disponible);
+
+  if (!disponible) {
+    alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Reservar";
+    return;
+  }
+
+  const nombre = document.getElementById("nombre").value;
+  const email = document.getElementById("email").value;
+
+  const reserva = {
+    nombre,
+    email,
+    habitacion: tipo,
+    entrada,
+    salida
+  };
+
+  try {
+    await addDoc(collection(db, "reservas"), reserva);
+    alert("¡Reserva realizada con éxito!");
+    reservaForm.reset(); // Limpia el formulario
+  } catch (error) {
+    console.error("Error al guardar la reserva:", error);
+    alert("Hubo un error al guardar la reserva. Intenta nuevamente.");
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Reservar";
+});
+
     });
   </script>
   </body>
