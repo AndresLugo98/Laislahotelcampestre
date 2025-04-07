@@ -27,10 +27,11 @@
             async function verificarDisponibilidad(tipo, entrada, salida) {
                 const reservasRef = collection(db, "reservas");
                 const q = query(reservasRef,
-                    where("tipo", "==", tipo),
-                    where("entrada", "<", salida),
-                    where("salida", ">", entrada)
-                );
+    where("habitacion", "==", tipo),  // 👈 este es el cambio
+    where("entrada", "<", salida),
+    where("salida", ">", entrada)
+);
+
                 const snapshot = await getDocs(q);
                 return snapshot.empty;  
             }
@@ -89,13 +90,14 @@
                     }
                     
                     try {
-    await addDoc(collection(db, "reservas"), { 
-        nombre, 
-        email, 
-        entrada: entrada.toISOString().split("T")[0], 
-        salida: salida.toISOString().split("T")[0], 
-        tipo 
-    });
+                        await addDoc(collection(db, "reservas"), { 
+    nombre, 
+    email, 
+    entrada: entrada.toISOString().split("T")[0], 
+    salida: salida.toISOString().split("T")[0], 
+    habitacion: tipo  // 👈 este es el cambio
+});
+
 
     alert("✅ Reserva realizada con éxito");
 
@@ -265,7 +267,7 @@ document.getElementById("consultaForm").addEventListener("submit", async (e) => 
             <div class="border p-4 rounded bg-gray-50 shadow">
                 <p><strong>Nombre:</strong> ${data.nombre}</p>
                 <p><strong>Correo:</strong> ${data.email}</p>
-                <p><strong>Tipo:</strong> ${data.tipo}</p>
+                <p><strong>Tipo:</strong> ${data.habitacion}</p>
                 <p><strong>Entrada:</strong> ${data.entrada}</p>
                 <p><strong>Salida:</strong> ${data.salida}</p>
             </div>
