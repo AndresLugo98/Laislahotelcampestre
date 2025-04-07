@@ -45,55 +45,57 @@
     return snapshot.empty;
   }
 
-  const reservaForm = document.getElementById("reserva-form");
-  const submitBtn = document.getElementById("submit-btn");
+  document.addEventListener("DOMContentLoaded", () => {
+    const reservaForm = document.getElementById("reservaForm");
+    const submitBtn = reservaForm.querySelector("button");
 
-  reservaForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    reservaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const entrada = document.getElementById("fecha-entrada").value;
-    const salida = document.getElementById("fecha-salida").value;
-    const tipo = document.getElementById("tipo-cabana").value;
+      const entrada = document.getElementById("entrada").value;
+      const salida = document.getElementById("salida").value;
+      const tipo = document.getElementById("tipo").value;
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Verificando...";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Verificando...";
 
-    const disponible = await verificarDisponibilidad(tipo, entrada, salida);
-    console.log("¿Disponible?", disponible);
+      const disponible = await verificarDisponibilidad(tipo, entrada, salida);
+      console.log("¿Disponible?", disponible);
 
-    if (!disponible) {
-      alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
+      if (!disponible) {
+        alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Reservar";
+        return;
+      }
+
+      const nombre = document.getElementById("nombre").value;
+      const email = document.getElementById("email").value;
+
+      const reserva = {
+        nombre,
+        email,
+        habitacion: tipo,
+        entrada,
+        salida
+      };
+
+      try {
+        console.log("✅ Intentando guardar reserva");
+        await addDoc(collection(db, "reservas"), reserva);
+        alert("Reserva realizada con éxito.");
+        reservaForm.reset();
+      } catch (error) {
+        console.error("Error al guardar la reserva:", error);
+        alert("Ocurrió un error al guardar la reserva.");
+      }
+
       submitBtn.disabled = false;
       submitBtn.textContent = "Reservar";
-      return;
-    }
-
-    const nombre = document.getElementById("nombre").value;
-    const email = document.getElementById("email").value;
-
-    const reserva = {
-      nombre,
-      email,
-      habitacion: tipo,
-      entrada,
-      salida
-    };
-
-    try {
-      console.log("✅ Intentando guardar reserva");
-      await addDoc(collection(db, "reservas"), reserva);
-      alert("Reserva realizada con éxito.");
-      reservaForm.reset();
-    } catch (error) {
-      console.error("Error al guardar la reserva:", error);
-      alert("Ocurrió un error al guardar la reserva.");
-    }
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Reservar";
+    });
   });
 </script>
-
+        
     </head>
 <body class="bg-gray-100 text-gray-900">
 </body>
