@@ -68,8 +68,10 @@
                 <img src="isla/2.png" alt="Logo del Hotel" class="w-16 h-16" loading="lazy">
                 <h1 class="text-xl font-bold">LA ISLA HOTEL CAMPESTRE</h1>
             </div>
-            <button id="menu-toggle" class="md:hidden text-xl" aria-label="Abrir menú">&#9776;</button>
-            <ul id="menu" class="hidden md:flex space-x-6 ml-auto">
+            <button id="menu-toggle" class="text-white md:hidden">
+                ☰
+              </button>              
+              <ul id="menu" class="hidden flex-col space-y-4 md:flex md:flex-row md:space-x-6 md:space-y-0 ml-auto text-center md:text-left mt-4 md:mt-0">
                 <li><a href="index.html" class="hover:text-yellow-400">Inicio</a></li>
                 <li><a href="Catálogo.html" class="hover:text-yellow-400">Catálogo</a></li>
                 <li><a href="Servicios.html" class="hover:text-yellow-400">Servicios</a></li>
@@ -378,5 +380,16 @@
      <footer class="bg-black text-white py-8 mt-16 text-center">
         <p>&copy; 2025 La Isla Hotel Campestre - Todos los derechos reservados</p>
     </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleBtn = document.getElementById("menu-toggle");
+            const menu = document.getElementById("menu");
+        
+            toggleBtn.addEventListener("click", () => {
+                menu.classList.toggle("hidden");
+            });
+        });
+        </script>
+        
 </body>
 </html>
