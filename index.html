@@ -7,155 +7,93 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>La Isla Hotel Campestre</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-            import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+      <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    where,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-            const firebaseConfig = {
-                apiKey: "TU_API_KEY",
-                authDomain: "TU_AUTH_DOMAIN",
-                projectId: "hotel-campestre-la-isla",
-                storageBucket: "TU_STORAGE_BUCKET",
-                messagingSenderId: "TU_MESSAGING_SENDER_ID",
-                appId: "TU_APP_ID"
-            };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRD9A3Tt1Brg0NJhNQUxVJoKY0bdpjFvE",
+    authDomain: "hotel-laisla.firebaseapp.com",
+    projectId: "hotel-laisla",
+    storageBucket: "hotel-laisla.appspot.com",
+    messagingSenderId: "1097874852033",
+    appId: "1:1097874852033:web:2b57908d04ae3e1a79ee69",
+    measurementId: "G-61HH9N7S6X"
+  };
 
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            console.log("✅ Firestore conectado correctamente");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-            async function verificarDisponibilidad(tipo, entrada, salida) {
-                const reservasRef = collection(db, "reservas");
-                const q = query(reservasRef,
-                    where("habitacion", "==", tipo),
-                    where("entrada", "<", salida),
-                    where("salida", ">", entrada)
-                );
+  async function verificarDisponibilidad(tipo, entrada, salida) {
+    const reservasRef = collection(db, "reservas");
+    const q = query(
+      reservasRef,
+      where("habitacion", "==", tipo),
+      where("entrada", "<", salida),
+      where("salida", ">", entrada)
+    );
 
-                const snapshot = await getDocs(q);
-                return snapshot.empty;  
-            }
+    const snapshot = await getDocs(q);
+    console.log("👉 Reservas encontradas:", snapshot.docs.length);
+    return snapshot.empty;
+  }
 
-            document.addEventListener("DOMContentLoaded", () => {
-                const reservaForm = document.getElementById("reservaForm");
-                const spinner = document.getElementById("spinner");
-                const reservarBtn = reservaForm.querySelector("button");
+  const reservaForm = document.getElementById("reserva-form");
+  const submitBtn = document.getElementById("submit-btn");
 
-                document.getElementById('menu-toggle').addEventListener('click', () => {
-                    document.getElementById('menu').classList.toggle('hidden');
-                });
+  reservaForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-                document.querySelectorAll("#menu a").forEach(link => {
-                    link.addEventListener("click", () => {
-                        document.getElementById("menu").classList.add("hidden");
-                    });
-                });
+    const entrada = document.getElementById("fecha-entrada").value;
+    const salida = document.getElementById("fecha-salida").value;
+    const tipo = document.getElementById("tipo-cabana").value;
 
-                reservaForm.addEventListener("submit", async (e) => {
-                    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Verificando...";
 
-                    const nombre = document.getElementById("nombre").value.trim();
-                    const email = document.getElementById("email").value.trim();
-                    const entrada = new Date(document.getElementById("entrada").value);
-                    const salida = new Date(document.getElementById("salida").value);
-                    const tipo = document.getElementById("tipo").value;
-                    const hoy = new Date();
-                    hoy.setHours(0, 0, 0, 0);
+    const disponible = await verificarDisponibilidad(tipo, entrada, salida);
+    console.log("¿Disponible?", disponible);
 
-                    if (!nombre || !email || isNaN(entrada) || isNaN(salida)) {
-                        alert("⚠️ Por favor, completa todos los campos.");
-                        return;
-                    }
-                    if (entrada < hoy) {
-                        alert("⚠️ La fecha de entrada no puede ser anterior a hoy.");
-                        return;
-                    }
-                    if (entrada >= salida) {
-                        alert("⚠️ La fecha de salida debe ser después de la fecha de entrada.");
-                        return;
-                    }
+    if (!disponible) {
+      alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Reservar";
+      return;
+    }
 
-                    reservarBtn.disabled = true;
-                    reservarBtn.textContent = "Verificando...";
-                    spinner.classList.remove("hidden");
+    const nombre = document.getElementById("nombre").value;
+    const email = document.getElementById("email").value;
 
-                    const disponible = await verificarDisponibilidad(tipo, entrada.toISOString().split("T")[0], salida.toISOString().split("T")[0]);
+    const reserva = {
+      nombre,
+      email,
+      habitacion: tipo,
+      entrada,
+      salida
+    };
 
-                    if (!disponible) {
-                        alert("❌ Lo sentimos, esas fechas ya están reservadas. Por favor, elige otras.");
-                        reservarBtn.disabled = false;
-                        reservarBtn.textContent = "Reservar";
-                        spinner.classList.add("hidden");
-                        return;
-                    }
+    try {
+      console.log("✅ Intentando guardar reserva");
+      await addDoc(collection(db, "reservas"), reserva);
+      alert("Reserva realizada con éxito.");
+      reservaForm.reset();
+    } catch (error) {
+      console.error("Error al guardar la reserva:", error);
+      alert("Ocurrió un error al guardar la reserva.");
+    }
 
-                    try {
-                        await addDoc(collection(db, "reservas"), { 
-                            nombre, 
-                            email, 
-                            entrada: entrada.toISOString().split("T")[0], 
-                            salida: salida.toISOString().split("T")[0], 
-                            habitacion: tipo
-                        });
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Reservar";
+  });
+</script>
 
-                        alert("✅ Reserva realizada con éxito");
-                        reservaForm.reset();
-                    } catch (error) {
-                        console.error("❌ Error al guardar la reserva:", error);
-                        alert("❌ No se pudo completar la reserva. Inténtalo más tarde.");
-                    } finally {
-                        reservarBtn.disabled = false;
-                        reservarBtn.textContent = "Reservar";
-                        spinner.classList.add("hidden");
-                    }
-                });
-
-                // CONSULTA DE RESERVAS
-                const consultaForm = document.getElementById("consultaForm");
-                const resultadoDiv = document.getElementById("resultadoReservas");
-
-                consultaForm.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById("consultaEmail").value.trim();
-
-                    if (!email) {
-                        alert("⚠️ Ingresa un correo electrónico.");
-                        return;
-                    }
-
-                    resultadoDiv.innerHTML = `<p class="text-gray-500">🔍 Consultando reservas...</p>`;
-
-                    try {
-                        const reservasRef = collection(db, "reservas");
-                        const q = query(reservasRef, where("email", "==", email));
-                        const snapshot = await getDocs(q);
-
-                        if (snapshot.empty) {
-                            resultadoDiv.innerHTML = `<p class="text-red-500">❌ No se encontraron reservas con ese correo.</p>`;
-                            return;
-                        }
-
-                        let html = "";
-                        snapshot.forEach(doc => {
-                            const data = doc.data();
-                            html += `
-                                <div class="p-4 border rounded shadow bg-gray-50">
-                                    <p><strong>Nombre:</strong> ${data.nombre}</p>
-                                    <p><strong>Tipo:</strong> ${data.habitacion}</p>
-                                    <p><strong>Entrada:</strong> ${data.entrada}</p>
-                                    <p><strong>Salida:</strong> ${data.salida}</p>
-                                </div>
-                            `;
-                        });
-
-                        resultadoDiv.innerHTML = html;
-                    } catch (error) {
-                        console.error("❌ Error consultando reservas:", error);
-                        resultadoDiv.innerHTML = `<p class="text-red-500">❌ Ocurrió un error al consultar. Intenta más tarde.</p>`;
-                    }
-                });
-            });
-        </script>
     </head>
 <body class="bg-gray-100 text-gray-900">
 </body>
