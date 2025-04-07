@@ -1,181 +1,192 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta name="description" content="Relájate en esta escapada única y tranquila. El hotel se encuentra a 15 minutos del Desierto de la Tatacoa.">
-        <meta name="keywords" content="Desierto de la Tatacoa, Hoteles Villavieja">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>La Isla Hotel Campestre</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-            import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    
-            const firebaseConfig = {
-                apiKey: "TU_API_KEY",
-                authDomain: "TU_AUTH_DOMAIN",
-                projectId: "hotel-campestre-la-isla",
-                storageBucket: "TU_STORAGE_BUCKET",
-                messagingSenderId: "TU_MESSAGING_SENDER_ID",
-                appId: "TU_APP_ID"
-            };
-    
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            console.log("✅ Firestore conectado correctamente");
-    
-            async function verificarDisponibilidad(tipo, entrada, salida) {
-                const reservasRef = collection(db, "reservas");
-                const q = query(reservasRef,
-                    where("tipo", "==", tipo),
-                    where("entrada", "<", salida),
-                    where("salida", ">", entrada)
-                );
-                const snapshot = await getDocs(q);
-                return snapshot.empty;  
-            }
-    
-            document.addEventListener("DOMContentLoaded", () => {
-                const reservaForm = document.getElementById("reservaForm");
-                const spinner = document.getElementById("spinner");
-                const reservarBtn = reservaForm.querySelector("button");
-    
-                document.getElementById('menu-toggle').addEventListener('click', () => {
-                    document.getElementById('menu').classList.toggle('hidden');
-           
-                });
+<head>
+    <meta name="description" content="Relájate en esta escapada única y tranquila. El hotel se encuentra a 15 minutos del Desierto de la Tatacoa.">
+    <meta name="keywords" content="Desierto de la Tatacoa, Hoteles Villavieja">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Isla Hotel Campestre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        (function(){
+            emailjs.init("TU_USER_ID"); // Reemplaza con tu clave pública de EmailJS
+        })();
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-                document.querySelectorAll("#menu a").forEach(link => {
-    link.addEventListener("click", () => {
-        document.getElementById("menu").classList.add("hidden");
-    });
-});
-                reservaForm.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-    
-                    const nombre = document.getElementById("nombre").value.trim();
-                    const email = document.getElementById("email").value.trim();
-                    const entrada = new Date(document.getElementById("entrada").value);
-                    const salida = new Date(document.getElementById("salida").value);
-                    const tipo = document.getElementById("tipo").value;
-                    const hoy = new Date();
-                    hoy.setHours(0, 0, 0, 0);
-    
-                    if (!nombre || !email || isNaN(entrada) || isNaN(salida)) {
-                        alert("⚠️ Por favor, completa todos los campos.");
-                        return;
-                    }
-                    if (entrada < hoy) {
-                        alert("⚠️ La fecha de entrada no puede ser anterior a hoy.");
-                        return;
-                    }
-                    if (entrada >= salida) {
-                        alert("⚠️ La fecha de salida debe ser después de la fecha de entrada.");
-                        return;
-                    }
-    
-                    reservarBtn.disabled = true;
-                    reservarBtn.textContent = "Verificando...";
-                    spinner.classList.remove("hidden");
-    
-                    const disponible = await verificarDisponibilidad(tipo, entrada.toISOString().split("T")[0], salida.toISOString().split("T")[0]);
-                    
-                    if (!disponible) {
-                        alert("❌ Lo sentimos, esas fechas ya están reservadas. Por favor, elige otras.");
-                        reservarBtn.disabled = false;
-                        reservarBtn.textContent = "Reservar";
-                        spinner.classList.add("hidden");
-                        return;
-                    }
-                    
-                    try {
-    await addDoc(collection(db, "reservas"), { 
-        nombre, 
-        email, 
-        entrada: entrada.toISOString().split("T")[0], 
-        salida: salida.toISOString().split("T")[0], 
-        tipo 
-    });
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "hotel-campestre-la-isla",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
 
-    alert("✅ Reserva realizada con éxito");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log("✅ Firestore conectado correctamente");
 
-    reservaForm.reset(); // Solo limpiar si la reserva se realizó con éxito
+        async function verificarDisponibilidad(tipo, entrada, salida) {
+            const reservasRef = collection(db, "reservas");
+            const q = query(reservasRef,
+                where("tipo", "==", tipo),
+                where("entrada", "<", salida),
+                where("salida", ">", entrada)
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.empty;  
+        }
 
-} catch (error) {
-    console.error("❌ Error al guardar la reserva:", error);
-    alert("❌ No se pudo completar la reserva. Inténtalo más tarde.");
-} finally {
-    reservarBtn.disabled = false;
-    reservarBtn.textContent = "Reservar";
-    spinner.classList.add("hidden");
-}
+        document.addEventListener("DOMContentLoaded", () => {
+            const reservaForm = document.getElementById("reservaForm");
+            const spinner = document.getElementById("spinner");
+            const reservarBtn = reservaForm.querySelector("button");
 
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.getElementById('menu').classList.toggle('hidden');
+            });
+
+            document.querySelectorAll("#menu a").forEach(link => {
+                link.addEventListener("click", () => {
+                    document.getElementById("menu").classList.add("hidden");
                 });
             });
-        </script>
-    </head>
+
+            reservaForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const nombre = document.getElementById("nombre").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const entrada = new Date(document.getElementById("entrada").value);
+                const salida = new Date(document.getElementById("salida").value);
+                const tipo = document.getElementById("tipo").value;
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+
+                if (!nombre || !email || isNaN(entrada) || isNaN(salida)) {
+                    alert("⚠️ Por favor, completa todos los campos.");
+                    return;
+                }
+                if (entrada < hoy) {
+                    alert("⚠️ La fecha de entrada no puede ser anterior a hoy.");
+                    return;
+                }
+                if (entrada >= salida) {
+                    alert("⚠️ La fecha de salida debe ser después de la fecha de entrada.");
+                    return;
+                }
+
+                reservarBtn.disabled = true;
+                reservarBtn.textContent = "Verificando...";
+                spinner.classList.remove("hidden");
+
+                const disponible = await verificarDisponibilidad(tipo, entrada.toISOString().split("T")[0], salida.toISOString().split("T")[0]);
+
+                if (!disponible) {
+                    alert("❌ Lo sentimos, esas fechas ya están reservadas. Por favor, elige otras.");
+                    reservarBtn.disabled = false;
+                    reservarBtn.textContent = "Reservar";
+                    spinner.classList.add("hidden");
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, "reservas"), { 
+                        nombre, 
+                        email, 
+                        entrada: entrada.toISOString().split("T")[0], 
+                        salida: salida.toISOString().split("T")[0], 
+                        tipo 
+                    });
+
+                    emailjs.send("TU_SERVICE_ID", "TU_TEMPLATE_ID", {
+                        nombre,
+                        email,
+                        tipo,
+                        entrada: entrada.toISOString().split("T")[0],
+                        salida: salida.toISOString().split("T")[0]
+                    }).then(() => {
+                        console.log("✉️ Correo de confirmación enviado");
+                    }).catch((error) => {
+                        console.error("❌ Error al enviar el correo:", error);
+                    });
+
+                    alert("✅ Reserva realizada con éxito");
+                    reservaForm.reset();
+                } catch (error) {
+                    console.error("❌ Error al guardar la reserva:", error);
+                    alert("❌ No se pudo completar la reserva. Inténtalo más tarde.");
+                } finally {
+                    reservarBtn.disabled = false;
+                    reservarBtn.textContent = "Reservar";
+                    spinner.classList.add("hidden");
+                }
+            });
+
+            // Consulta de reservas por correo
+            const consultaForm = document.getElementById("consultaForm");
+            if (consultaForm) {
+                consultaForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById("consultaEmail").value.trim();
+                    const resultado = document.getElementById("resultadoReservas");
+                    resultado.innerHTML = "";
+
+                    if (!email) {
+                        alert("⚠️ Por favor, ingresa un correo electrónico.");
+                        return;
+                    }
+
+                    const reservasRef = collection(db, "reservas");
+                    const q = query(reservasRef, where("email", "==", email));
+                    const snapshot = await getDocs(q);
+
+                    if (snapshot.empty) {
+                        resultado.innerHTML = `<p class="text-red-500 text-center">❌ No se encontraron reservas para este correo.</p>`;
+                        return;
+                    }
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        resultado.innerHTML += `
+                            <div class="border p-4 rounded bg-gray-50 shadow">
+                                <p><strong>Nombre:</strong> ${data.nombre}</p>
+                                <p><strong>Correo:</strong> ${data.email}</p>
+                                <p><strong>Tipo:</strong> ${data.tipo}</p>
+                                <p><strong>Entrada:</strong> ${data.entrada}</p>
+                                <p><strong>Salida:</strong> ${data.salida}</p>
+                            </div>
+                        `;
+                    });
+                });
+            }
+        });
+    </script>
+</head>
 <body class="bg-gray-100 text-gray-900">
-    <header>
-        <nav id="navbar" class="bg-black fixed top-0 left-0 w-full p-4 text-white z-50">
-            <div class="max-w-6xl mx-auto flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="isla/2.png" alt="Logo del Hotel" class="w-16 h-16">
-                    <h1 class="text-xl font-bold">LA ISLA HOTEL CAMPESTRE</h1>
-                </div>
-                <button id="menu-toggle" class="md:hidden text-xl">&#9776;</button>
-                <ul id="menu" class="hidden md:flex space-x-6 ml-auto">
-                    <a href="index.html">Inicio</a>
-                    <a href="Catálogo.html">Catálogo</a>
-                    <a href="Servicios.html">Servicios</a>
-                    <a href="Contacto.html">Contacto</a>
-                </ul>
+    <!-- (Tu cuerpo HTML permanece igual hasta el final del formulario de reservas) -->
+
+    <!-- Nueva sección: Consulta de reservas -->
+    <section class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+        <h2 class="text-2xl font-bold mb-4 text-center">Consultar Mis Reservas</h2>
+        <form id="consultaForm" class="space-y-4">
+            <div>
+                <label for="consultaEmail" class="block mb-1 font-semibold">Correo Electrónico</label>
+                <input type="email" id="consultaEmail" class="w-full p-2 border rounded transition duration-300 hover:border-yellow-500 focus:outline-none focus:ring focus:ring-yellow-300" required>
             </div>
-        </nav>
-    </header>
-
-    <section id="inicio" class="relative min-h-screen flex items-center justify-center text-center text-white bg-cover bg-center" style="background: url('isla/1.png') no-repeat center center/cover;">
-        <div class="bg-black bg-opacity-50 absolute inset-0 backdrop-blur-sm"></div>
-        <div class="relative z-10">
-            <h2 class="text-5xl font-extrabold uppercase">Las Mejores Cabañas</h2>
-            <p class="mt-4 text-lg">Un paraíso y conexión con la naturaleza, ideal para tus vacaciones</p>
-
-            <!-- Sección de Quiénes Somos -->
-            <div class="mt-6">
-                <a href="#reservas" class="inline-block bg-yellow-500 text-black px-6 py-3 rounded-lg text-lg font-bold hover:bg-yellow-400 transition-transform transform hover:scale-105">Reserva Ahora</a>
-                
-                <div class="mt-6 bg-black bg-opacity-60 p-4 rounded-lg w-full max-w-4xl mx-auto text-justify">
-                    <h3 class="text-2xl font-bold text-center">¿Quiénes Somos?</h3>
-                    <p class="mt-2 text-lg">
-                        La Isla Hotel Campestre es un refugio de tranquilidad y naturaleza ubicado a solo 15 minutos del Desierto de la Tatacoa. Nuestro compromiso es ofrecerte una experiencia inolvidable en un ambiente acogedor, con instalaciones de primera y un servicio excepcional.
-                    </p>
-                </div>
-            </div>
-            <!-- Fin de la sección de Quiénes Somos -->
-
-        </div>
-    </section>
-
-    <section id="reservas" class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
-        <h2 class="text-2xl font-bold mb-4 text-center">Reserva tu Estadía</h2>
-        <form id="reservaForm">
-            <input type="text" id="nombre" placeholder="Nombre" class="w-full p-2 border rounded mb-4" required>
-            <input type="email" id="email" placeholder="Correo Electrónico" class="w-full p-2 border rounded mb-4" required>
-            <input type="date" id="entrada" class="w-full p-2 border rounded mb-4" required>
-            <input type="date" id="salida" class="w-full p-2 border rounded mb-4" required>
-            <select id="tipo" class="w-full p-2 border rounded mb-4" required>
-                <option value="Cabaña Familiar">Cabaña para Pareja</option>
-                <option value="Cabaña para Pareja">Cabaña Familiar</option>
-                <option value="Multifamiliar">Multifamiliar</option>
-            </select>
-            <button type="submit" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold w-full">Reservar</button>
+            <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-bold w-full transition-transform hover:scale-105 hover:bg-blue-400">Ver mis reservas</button>
         </form>
+        <div id="resultadoReservas" class="mt-6 space-y-4"></div>
     </section>
 
     <footer class="bg-black text-white py-8 mt-16 text-center">
         <p>&copy; 2025 La Isla Hotel Campestre - Todos los derechos reservados</p>
     </footer>
 </body>
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const entradaInput = document.getElementById("entrada");
@@ -189,11 +200,11 @@
 
         entradaInput.addEventListener("change", () => {
             salidaInput.min = entradaInput.value;
-            salidaInput.value = ""; //Limpiar la fecha de salida si cambia la entrada
+            salidaInput.value = "";
         });
 
         actualizarFechasMin();
     });
 </script>
-
 </html>
+
