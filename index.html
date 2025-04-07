@@ -239,40 +239,4 @@
     </form>
     <div id="resultadoReservas" class="mt-6 space-y-4"></div>
 </section>
-
-// Consultar reservas por correo
-document.getElementById("consultaForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("consultaEmail").value.trim();
-    const resultado = document.getElementById("resultadoReservas");
-    resultado.innerHTML = ""; // Limpiar resultados anteriores
-
-    if (!email) {
-        alert("⚠️ Por favor, ingresa un correo electrónico.");
-        return;
-    }
-
-    const reservasRef = collection(db, "reservas");
-    const q = query(reservasRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-        resultado.innerHTML = `<p class="text-red-500 text-center">❌ No se encontraron reservas para este correo.</p>`;
-        return;
-    }
-
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        resultado.innerHTML += `
-            <div class="border p-4 rounded bg-gray-50 shadow">
-                <p><strong>Nombre:</strong> ${data.nombre}</p>
-                <p><strong>Correo:</strong> ${data.email}</p>
-                <p><strong>Tipo:</strong> ${data.habitacion}</p>
-                <p><strong>Entrada:</strong> ${data.entrada}</p>
-                <p><strong>Salida:</strong> ${data.salida}</p>
-            </div>
-        `;
-    });
-});
-
 </html>
