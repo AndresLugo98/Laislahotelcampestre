@@ -36,8 +36,7 @@
 
             <!-- Sección de Quiénes Somos -->
             <div class="mt-6">
-                <a href="#reservas" class="inline-block bg-yellow-500 text-black px-6 py-3 rounded-lg text-lg font-bold hover:bg-yellow-400 transition-transform transform hover:scale-105">Reserva Ahora</a>
-                
+              <a href="#reservas" class="mt-4 inline-block bg-white text-black px-4 py-2 rounded shadow hover:bg-yellow-200 transition">Reservar ahora</a> 
                 <div class="mt-6 bg-black bg-opacity-60 p-4 rounded-lg w-full max-w-4xl mx-auto text-justify">
                     <h3 class="text-2xl font-bold text-center">¿Quiénes Somos?</h3>
                     <p class="mt-2 text-lg">
@@ -106,8 +105,10 @@
         actualizarFechasMin();
 
         document.getElementById('menu-toggle').addEventListener('click', () => {
-            document.getElementById('menu').classList.toggle('hidden');
-        });
+       const menu = document.getElementById('menu');
+          menu.classList.toggle('hidden');
+          menu.classList.toggle('flex');
+       });
 
         document.querySelectorAll("#menu a").forEach(link => {
             link.addEventListener("click", () => {
@@ -144,14 +145,14 @@
     } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
   
     const firebaseConfig = {
-  apiKey: "AIzaSyALUzv8j9YKv__aXkcuJ2JD_DQQ7ZDw66M",
-  authDomain: "hotel-campestre-la-isla.firebaseapp.com",
-  projectId: "hotel-campestre-la-isla",
-  storageBucket: "hotel-campestre-la-isla.firebasestorage.app",
-  messagingSenderId: "939808374982",
-  appId: "1:939808374982:web:b77b2f3ebaa1992b8bd7c7",
-  measurementId: "G-DK1D6SVMBL"
-};
+      apiKey: "AIzaSyALUzv8j9YKv__aXkcuJ2JD_DQQ7ZDw66M",
+      authDomain: "hotel-campestre-la-isla.firebaseapp.com",
+      projectId: "hotel-campestre-la-isla",
+      storageBucket: "hotel-campestre-la-isla.firebasestorage.app",
+      messagingSenderId: "939808374982",
+      appId: "1:939808374982:web:b77b2f3ebaa1992b8bd7c7",
+      measurementId: "G-DK1D6SVMBL"
+    };
   
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -175,50 +176,85 @@
       const submitBtn = reservaForm.querySelector("button");
   
       reservaForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const entrada = document.getElementById("entrada").value;
-  const salida = document.getElementById("salida").value;
-  const tipo = document.getElementById("tipo").value;
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Verificando...";
-
-  const disponible = await verificarDisponibilidad(tipo, entrada, salida);
-  console.log("¿Disponible?", disponible);
-
-  if (!disponible) {
-    alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Reservar";
-    return;
-  }
-
-  const nombre = document.getElementById("nombre").value;
-  const email = document.getElementById("email").value;
-
-  const reserva = {
-    nombre,
-    email,
-    habitacion: tipo,
-    entrada,
-    salida
-  };
-
-  try {
-    await addDoc(collection(db, "reservas"), reserva);
-    alert("¡Reserva realizada con éxito!");
-    reservaForm.reset(); // Limpia el formulario
-  } catch (error) {
-    console.error("Error al guardar la reserva:", error);
-    alert("Hubo un error al guardar la reserva. Intenta nuevamente.");
-  }
-
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Reservar";
-});
-
+        e.preventDefault();
+  
+        const entrada = document.getElementById("entrada").value;
+        const salida = document.getElementById("salida").value;
+        const tipo = document.getElementById("tipo").value;
+  
+        if (entrada >= salida) {
+          alert("La fecha de salida debe ser posterior a la de entrada.");
+          return;
+        }
+  
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Verificando...";
+  
+        const disponible = await verificarDisponibilidad(tipo, entrada, salida);
+        console.log("¿Disponible?", disponible);
+  
+        if (!disponible) {
+          alert("Lo sentimos, la cabaña no está disponible para esas fechas.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Reservar";
+          return;
+        }
+  
+        const nombre = document.getElementById("nombre").value;
+        const email = document.getElementById("email").value;
+  
+        const reserva = {
+          nombre,
+          email,
+          habitacion: tipo,
+          entrada,
+          salida
+        };
+  
+        try {
+          await addDoc(collection(db, "reservas"), reserva);
+          alert("¡Reserva realizada con éxito!");
+          reservaForm.reset(); // Limpia el formulario
+        } catch (error) {
+          console.error("Error al guardar la reserva:", error);
+          alert("Hubo un error al guardar la reserva. Intenta nuevamente.");
+        }
+  
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Reservar";
+      });
+  
+      // 🔍 CONSULTAR RESERVAS POR CORREO
+      const consultaForm = document.getElementById("consultaForm");
+      const resultadoDiv = document.getElementById("resultadoReservas");
+  
+      consultaForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        resultadoDiv.innerHTML = "Cargando...";
+  
+        const email = document.getElementById("consultaEmail").value;
+        const reservasRef = collection(db, "reservas");
+        const q = query(reservasRef, where("email", "==", email));
+        const snapshot = await getDocs(q);
+  
+        if (snapshot.empty) {
+          resultadoDiv.innerHTML = "<p>No se encontraron reservas para este correo.</p>";
+          return;
+        }
+  
+        resultadoDiv.innerHTML = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return `
+            <div class="p-4 border rounded shadow">
+              <p><strong>Nombre:</strong> ${data.nombre}</p>
+              <p><strong>Tipo de Cabaña:</strong> ${data.habitacion}</p>
+              <p><strong>Entrada:</strong> ${data.entrada}</p>
+              <p><strong>Salida:</strong> ${data.salida}</p>
+            </div>
+          `;
+        }).join("");
+      });
     });
-  </script>
+  </script>  
   </body>
 </html>
